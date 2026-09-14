@@ -1,0 +1,37 @@
+name: Build CV PDFs
+
+on:
+  push:
+    paths:
+      - 'scripts/build_cv_pdfs.py'
+      - '.github/workflows/build-cv.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      - name: Install ReportLab
+        run: pip install reportlab
+
+      - name: Build Italian and English PDFs
+        run: python scripts/build_cv_pdfs.py
+
+      - name: Commit generated PDFs
+        run: |
+          git config user.name "Vladyslav Yeletskyi"
+          git config user.email "110339588+VladislavII@users.noreply.github.com"
+          git add assets/cv/Vladyslav_Yeletskyi_CV_IT.pdf assets/cv/Vladyslav_Yeletskyi_CV_EN.pdf
+          git diff --cached --quiet || git commit -m "Build bilingual CV PDFs"
+          git push
